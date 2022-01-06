@@ -103,11 +103,20 @@ def decode_and_split(js):
 f1 = open('test.txt','r',encoding='utf-8', errors="", newline="") 
 #f2 = open('test.txt','r',encoding='utf-8', errors="", newline="")
 
+#blacklist:16637行
+
+domain_num = 16637
+
 whitelist = f1.readlines()
 #blacklist = f2.readlines()
 jsdata=[]
+
+index = 0
 for data in whitelist: 
+    if index >= domain_num:
+        break
     if not data == '':
+        index +=1
         data = data.rstrip('\n')
         domain = data.rstrip('\r')
         print(domain)
@@ -131,7 +140,10 @@ for data in whitelist:
 
 """
 for data in blacklist: 
+    if index >= domain_num:
+        break
     if not data == '':
+        index +=1
         data = data.rstrip('\n')
         domain = data.rstrip('\r')
         print(domain)
