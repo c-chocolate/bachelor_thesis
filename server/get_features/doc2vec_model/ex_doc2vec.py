@@ -21,7 +21,7 @@ def get_html(url):
     try:
         resp = urllib.request.urlopen(request, timeout=5)
         return resp.read()
-    except (urllib.error.HTTPError, urllib.error.URLError, http.client.BadStatusLine, http.client.IncompleteRead, http.client.HTTPException,
+    except (socket.timeout, urllib.error.HTTPError, urllib.error.URLError, http.client.BadStatusLine, http.client.IncompleteRead, http.client.HTTPException,
         UnicodeError, UnicodeEncodeError) as e: # possibly plaintext or HTTP/1.0
         print("ERROR:",e,url)
         return None
@@ -32,30 +32,34 @@ def get_html(url):
 def get_js_link(url):
     html = get_html(url)
     if html:
-        decodehtml = html.decode('utf-8')
-        decodehtml = decodehtml.replace(' ','')     #空白を抜く
-        #src= or href=で始まり.jsで終わる文字列検索
-        findjssrc = re.findall(r'src=[\",\'][a-z,A-Z,0-9,\-,\_,\.,\!,\',\(,\),\~,\s,\/]+\.js[\",\']',decodehtml) 
-        findjshref = re.findall(r'href=[\",\'][a-z,A-Z,0-9,\-,\_,\.,\!,\',\(,\),\~,\s,\/]+\.js[\",\']',decodehtml) 
-        findjs = findjssrc + findjshref
-        #print(findjs)   
-        findjsurl = re.findall(r'https?://[a-z,A-Z,0-9,\-,\_,\.,\!,\',\(,\),\~,\s,\/]+\.js[\",\']',decodehtml)
-        #print(findjsurl) 
+        try:
+            decodehtml = html.decode('utf-8')
+            decodehtml = decodehtml.replace(' ','')     #空白を抜く
+            #src= or href=で始まり.jsで終わる文字列検索
+            findjssrc = re.findall(r'src=[\",\'][a-z,A-Z,0-9,\-,\_,\.,\!,\',\(,\),\~,\s,\/]+\.js[\",\']',decodehtml) 
+            findjshref = re.findall(r'href=[\",\'][a-z,A-Z,0-9,\-,\_,\.,\!,\',\(,\),\~,\s,\/]+\.js[\",\']',decodehtml) 
+            findjs = findjssrc + findjshref
+            #print(findjs)   
+            findjsurl = re.findall(r'https?://[a-z,A-Z,0-9,\-,\_,\.,\!,\',\(,\),\~,\s,\/]+\.js[\",\']',decodehtml)
+            #print(findjsurl) 
 
-        for index, value in enumerate(findjs):
-            findjs[index] = value.replace('src=','')
-            findjs[index] = findjs[index].replace('href=','')
-            findjs[index] = findjs[index].replace('\"','')
-            findjs[index] = findjs[index].replace("\'","")
-            
-            if findjs[index][:2]=='//':#頭が//だったらhttps:加えて、findjsurlに変更
-                findjsurl.append('https:' + findjs[index])
-                findjs[index] = ''
+            for index, value in enumerate(findjs):
+                findjs[index] = value.replace('src=','')
+                findjs[index] = findjs[index].replace('href=','')
+                findjs[index] = findjs[index].replace('\"','')
+                findjs[index] = findjs[index].replace("\'","")
+                
+                if findjs[index][:2]=='//':#頭が//だったらhttps:加えて、findjsurlに変更
+                    findjsurl.append('https:' + findjs[index])
+                    findjs[index] = ''
 
-        for index, value in enumerate(findjsurl):
-            findjsurl[index] = value.replace('\"','')
-            findjsurl[index] = findjsurl[index].replace("\'","")
-        return findjs, findjsurl
+            for index, value in enumerate(findjsurl):
+                findjsurl[index] = value.replace('\"','')
+                findjsurl[index] = findjsurl[index].replace("\'","")
+            return findjs, findjsurl
+        except (UnicodeDecodeError):
+            print("UnicodeDecodeError")
+            return None, None
     else:
         return None, None
 
@@ -90,14 +94,17 @@ def url_to_code(url):
 #decodeして１行ずつ分割
 def decode_and_split(js):
     jssplit_result = []
-    decodejs = js.decode('utf-8')
-    jssplit = decodejs.split('\n')
-    
-    for a in jssplit:
-        if a !='':
-            a = a.replace(' ','')
-            jssplit_result.append(a)
-
+    try:
+        decodejs = js.decode('utf-8')
+        jssplit = decodejs.split('\n')
+        
+        for a in jssplit:
+            if a !='':
+                a = a.replace(' ','')
+                jssplit_result.append(a)
+    except (UnicodeDecodeError):
+        print("UnicodeDecodeError")
+        
     return jssplit_result
 
 mode = 0 #0:test 1:ex
