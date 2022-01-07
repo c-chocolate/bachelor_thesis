@@ -22,8 +22,8 @@ def get_html(url):
         resp = urllib.request.urlopen(request, timeout=5)
         return resp.read()
     except (urllib.error.HTTPError, urllib.error.URLError, http.client.BadStatusLine, http.client.IncompleteRead, http.client.HTTPException,
-        UnicodeError, UnicodeEncodeError): # possibly plaintext or HTTP/1.0
-        print("ERROR:",url)
+        UnicodeError, UnicodeEncodeError) as e: # possibly plaintext or HTTP/1.0
+        print("ERROR:",e,url)
         return None
     except:
         raise
@@ -124,23 +124,23 @@ for data in blacklist:
         data = data.rstrip('\n')
         domain = data.rstrip('\r')
         print(domain)
-        jslink, jsurllink = get_js_link(domain)
         if get_html(domain):
             domain_num += 1
-        print(jslink,jsurllink)
-        if jslink!=None:
-            for index,value in enumerate(jslink):
-                js = link_to_code(domain, value)
-                if js:
-                    jssplit = decode_and_split(js)
-                    jsdata.append(jssplit)
+            jslink, jsurllink = get_js_link(domain)
+            print(jslink,jsurllink)
+            if jslink!=None:
+                for index,value in enumerate(jslink):
+                    js = link_to_code(domain, value)
+                    if js:
+                        jssplit = decode_and_split(js)
+                        jsdata.append(jssplit)
 
-        if jsurllink!=None:         
-            for index,value in enumerate(jsurllink):
-                js = url_to_code(value)
-                if js:
-                    jssplit = decode_and_split(js)
-                    jsdata.append(jssplit)
+            if jsurllink!=None:         
+                for index,value in enumerate(jsurllink):
+                    js = url_to_code(value)
+                    if js:
+                        jssplit = decode_and_split(js)
+                        jsdata.append(jssplit)
 
 print(domain_num)
 
