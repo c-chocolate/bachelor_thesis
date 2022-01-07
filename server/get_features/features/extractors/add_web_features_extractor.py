@@ -24,7 +24,7 @@ def get_html(url):
     try:
         resp = urllib.request.urlopen(request, timeout=5)
         return resp.read()
-    except (urllib.error.HTTPError, http.client.BadStatusLine, http.client.IncompleteRead, http.client.HTTPException,
+    except (urllib.error.HTTPError, urllib.error.URLError, http.client.BadStatusLine, http.client.IncompleteRead, http.client.HTTPException,
         UnicodeError, UnicodeEncodeError): # possibly plaintext or HTTP/1.0
         print("ERROR:", url)
         return None
