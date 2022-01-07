@@ -84,7 +84,7 @@ def url_to_code(url):
         contents = urllib.request.urlopen(url,timeout=5)
         js = contents.read()
         return js
-    except (urllib.error.HTTPError,http.client.BadStatusLine, http.client.IncompleteRead, http.client.HTTPException,
+    except (socket.timeout, urllib.error.HTTPError,http.client.BadStatusLine, http.client.IncompleteRead, http.client.HTTPException,
         UnicodeError, UnicodeEncodeError): # possibly plaintext or HTTP/1.0
         print("ERROR:",url)
         return None
@@ -104,7 +104,7 @@ def decode_and_split(js):
                 jssplit_result.append(a)
     except (UnicodeDecodeError):
         print("UnicodeDecodeError")
-        
+
     return jssplit_result
 
 mode = 0 #0:test 1:ex
