@@ -110,8 +110,8 @@ def link_to_code(url, link):
         try:
             contents = urllib.request.urlopen("http://"+url+"/"+ link,timeout=5)
             return contents.read()
-        except (urllib.error.HTTPError,http.client.BadStatusLine, http.client.IncompleteRead, http.client.HTTPException,
-            UnicodeError, UnicodeEncodeError): # possibly plaintext or HTTP/1.0
+        except (urllib.error.HTTPError, urllib.error.URLError, http.client.BadStatusLine, http.client.IncompleteRead, http.client.HTTPException,
+        UnicodeError, UnicodeEncodeError): # possibly plaintext or HTTP/1.0
             print("ERROR:",link)
             return None
         except:
