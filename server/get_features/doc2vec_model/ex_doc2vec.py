@@ -21,7 +21,7 @@ def get_html(url):
     try:
         resp = urllib.request.urlopen(request, timeout=5)
         return resp.read()
-    except (urllib.error.HTTPError, http.client.BadStatusLine, http.client.IncompleteRead, http.client.HTTPException,
+    except (urllib.error.HTTPError, urllib.error.URLError, http.client.BadStatusLine, http.client.IncompleteRead, http.client.HTTPException,
         UnicodeError, UnicodeEncodeError): # possibly plaintext or HTTP/1.0
         print("ERROR:",url)
         return None
@@ -72,7 +72,7 @@ def link_to_code(url, link):
         except:
             raise
     else:
-        print('None')
+        #print('None')
         return None
 
 def url_to_code(url):
@@ -100,54 +100,33 @@ def decode_and_split(js):
 
     return jssplit_result
 
-f1 = open('test.txt','r',encoding='utf-8', errors="", newline="") 
-#f2 = open('test.txt','r',encoding='utf-8', errors="", newline="")
+mode = 0 #0:test 1:ex
+
+if mode == 0:
+    f1 = open('test.txt','r',encoding='utf-8', errors="", newline="") 
+elif mode == 1:
+    f1 = open('blacklist.txt','r',encoding='utf-8', errors="", newline="")
+    f2 = open('tranco_100k.txt','r',encoding='utf-8', errors="", newline="")
 
 #blacklist:16637行
 
-domain_num = 16637
+domain_num = 0
 
-whitelist = f1.readlines()
-#blacklist = f2.readlines()
+blacklist = f1.readlines()
+if mode ==1:
+    whitelist = f2.readlines()
+
 jsdata=[]
 
 index = 0
-for data in whitelist: 
-    if index >= domain_num:
-        break
-    if not data == '':
-        index +=1
-        data = data.rstrip('\n')
-        domain = data.rstrip('\r')
-        print(domain)
-        jslink, jsurllink = get_js_link(domain)
-        print(jslink,jsurllink)
-        if jslink!=None:
-            for index,value in enumerate(jslink):
-                js = link_to_code(domain, value)
-                if js:
-                    jssplit = decode_and_split(js)
-                    jsdata.append(jssplit)
-
-        if jsurllink!=None:         
-            for index,value in enumerate(jsurllink):
-                js = url_to_code(value)
-                if js:
-                    jssplit = decode_and_split(js)
-                    jsdata.append(jssplit)
-
-#print(len(jsdata))
-
-"""
 for data in blacklist: 
-    if index >= domain_num:
-        break
     if not data == '':
-        index +=1
         data = data.rstrip('\n')
         domain = data.rstrip('\r')
         print(domain)
         jslink, jsurllink = get_js_link(domain)
+        if get_html(domain):
+            domain_num += 1
         print(jslink,jsurllink)
         if jslink!=None:
             for index,value in enumerate(jslink):
@@ -162,7 +141,35 @@ for data in blacklist:
                 if js:
                     jssplit = decode_and_split(js)
                     jsdata.append(jssplit)
-"""
+
+print(domain_num)
+
+if mode ==1:
+    index = 0
+    for data in whitelist: 
+        if index >= domain_num:
+            break
+        if not data == '':
+            index +=1
+            data = data.rstrip('\n')
+            domain = data.rstrip('\r')
+            print(domain)
+            jslink, jsurllink = get_js_link(domain)
+            print(jslink,jsurllink)
+            if jslink!=None:
+                for index,value in enumerate(jslink):
+                    js = link_to_code(domain, value)
+                    if js:
+                        jssplit = decode_and_split(js)
+                        jsdata.append(jssplit)
+
+            if jsurllink!=None:         
+                for index,value in enumerate(jsurllink):
+                    js = url_to_code(value)
+                    if js:
+                        jssplit = decode_and_split(js)
+                        jsdata.append(jssplit)
+
 
 
 trainings = [TaggedDocument(data, [i]) for i,data in enumerate(jsdata)]
@@ -172,8 +179,12 @@ m = Doc2Vec(documents= trainings, vector_size=1, dm = 0, alpha=0.003, window=16,
 # iter=200
 
 # モデルのセーブ
-#m.save("doc2vec.model")
-m.save("test.model")
+if mode == 0:
+    m.save("test.model")
+elif mode ==1:
+    m.save("doc2vec.model")
+
 
 f1.close()
-#f2.close()
+if mode == 1:
+    f2.close()
