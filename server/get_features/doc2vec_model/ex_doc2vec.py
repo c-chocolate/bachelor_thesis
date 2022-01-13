@@ -110,7 +110,7 @@ def decode_and_split(js):
 
     return jssplit_result
 
-mode = 3 #0:test 1:black 2:white 3:model       !!
+mode = 2 #0:test 1:black 2:white 3:model       !!
 
 if mode == 0 :
     f1 = open('test.txt','r',encoding='utf-8', errors="", newline="") 
@@ -203,19 +203,19 @@ print(datanum)
 #print(reredata[0][0])
 #print("QQQ",jsdata==reredata)
 
-
+index_white = 0   #whitelistの現在の数
 if mode ==2 :
-    domainmax=16000     # !!
-    index = 0   #whitelistの現在の数
+    domainmax=15521     # !!
+    
     for data in whitelist: 
-        if index >= domainmax:
+        if index_white >= domainmax:
             break
-        if not data == '' and datanum>modetwo_datanum:
-            index +=1
+        if not data == '' and index_white>modetwo_datanum:
+            index_white +=1
             data = data.rstrip('\n')
             domain = data.rstrip('\r')
             #datanum+=1
-            print("<<whitelist>>",index,domain)
+            print("<<whitelist>>",index_white,domain)
             if get_html(domain):
                 jslink, jsurllink = get_js_link(domain)
                 print(jslink,jsurllink)
@@ -239,10 +239,10 @@ if mode ==2 :
                             np.save('np_white_jsdata',np_jsdata)
                             #f3.write(str(jssplit) + "\n")
             f4 = open('jsdata_domainnum.txt', 'w')
-            f4.write(str(index)+str(domain)+"\n")
+            f4.write(str(index_white)+str(domain)+"\n")
             f4.close()
-        elif datanum<=modetwo_datanum:
-            datanum+=1
+        elif index_white<=modetwo_datanum:
+            index_white+=1
 
 #f3.close()
 #f4.close()
