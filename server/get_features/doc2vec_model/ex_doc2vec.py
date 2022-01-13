@@ -107,7 +107,7 @@ def decode_and_split(js):
 
     return jssplit_result
 
-mode = 0 #0:test 1:ex
+mode = 0 #0:test 1:exnew 2:ex途中       !!
 
 if mode == 0:
     f1 = open('test.txt','r',encoding='utf-8', errors="", newline="") 
@@ -117,22 +117,43 @@ elif mode == 1:
 
 #blacklist:16637行
 
-domain_num = 0
+#domain_num = 0
 
 blacklist = f1.readlines()
 if mode ==1:
     whitelist = f2.readlines()
 
+f3 = open('jsdatalist.txt', 'w')
+f4 = open('jsdata_domainnum.txt', 'w')
+#for x in list_row:
+#    f.write(str(x) + "\n")
+#f.close()
+
 jsdata=[]
+datanum=0
+
+if mode==2:
+    f5 = open("./jsdatalist.txt","r")
+    for x in f5:
+        jsdata.append(x.rstrip("\n"))
+        #以下のようにしてしまうと、改行コードがlistに入ってしまうため注意
+        #list_row.append(x)
+    f5.close()
+    modetwo_datanum=0       # !!jsdata_domainnum.txtの数入れる
+
+    
+
 
 index = 0
+
 for data in blacklist: 
-    if not data == '':
+    if not data == '' and datanum>modetwo_datanum:
         data = data.rstrip('\n')
         domain = data.rstrip('\r')
-        print(domain)
+        datanum+=1
+        print("blacklist",datanum,domain)
         if get_html(domain):
-            domain_num += 1
+            #domain_num += 1
             jslink, jsurllink = get_js_link(domain)
             print(jslink,jsurllink)
             if jslink!=None:
@@ -141,6 +162,7 @@ for data in blacklist:
                     if js:
                         jssplit = decode_and_split(js)
                         jsdata.append(jssplit)
+                        f3.write(str(jssplit) + "\n")
 
             if jsurllink!=None:         
                 for index,value in enumerate(jsurllink):
@@ -148,36 +170,50 @@ for data in blacklist:
                     if js:
                         jssplit = decode_and_split(js)
                         jsdata.append(jssplit)
+                        f3.write(str(jssplit) + "\n")
+        f4.write(str(domainnum)+str(domain)+"\n")
+    elif datanum=<modetwo_datanum:
+        datanum+=1
 
-print(domain_num)
+
+print(datanum)
+domainmax=datanum   #domainmax:blacklistで読み込んだ数
 
 if mode ==1:
-    index = 0
+    index = 0   #whitelistの現在の数
     for data in whitelist: 
-        if index >= domain_num:
+        if index >= domainmax:
             break
-        if not data == '':
+        if not data == '' and datanum>modetwo_datanum:
             index +=1
             data = data.rstrip('\n')
             domain = data.rstrip('\r')
-            print(domain)
-            jslink, jsurllink = get_js_link(domain)
-            print(jslink,jsurllink)
-            if jslink!=None:
-                for index,value in enumerate(jslink):
-                    js = link_to_code(domain, value)
-                    if js:
-                        jssplit = decode_and_split(js)
-                        jsdata.append(jssplit)
+            datanum+=1
+            print("blacklist",datamax,"whitelist",index,domain)
+            if get_html(domain):
+                jslink, jsurllink = get_js_link(domain)
+                print(jslink,jsurllink)
+                if jslink!=None:
+                    for index,value in enumerate(jslink):
+                        js = link_to_code(domain, value)
+                        if js:
+                            jssplit = decode_and_split(js)
+                            jsdata.append(jssplit)
+                            f3.write(str(jssplit) + "\n")
 
-            if jsurllink!=None:         
-                for index,value in enumerate(jsurllink):
-                    js = url_to_code(value)
-                    if js:
-                        jssplit = decode_and_split(js)
-                        jsdata.append(jssplit)
+                if jsurllink!=None:         
+                    for index,value in enumerate(jsurllink):
+                        js = url_to_code(value)
+                        if js:
+                            jssplit = decode_and_split(js)
+                            jsdata.append(jssplit)
+                            f3.write(str(jssplit) + "\n")
+            f4.write(str(domainnum)+str(domain)+"\n")
+        elif datanum=<modetwo_datanum:
+            datanum+=1
 
-
+f3.close()
+f4.close()
 
 trainings = [TaggedDocument(data, [i]) for i,data in enumerate(jsdata)]
 
