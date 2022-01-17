@@ -1,0 +1,11 @@
+beautifulsoup4
+geoip2
+joblib
+lightgbm
+matplotlib
+numpy
+pandas
+python-whois
+requests
+tldextract
+
