@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+
+#features/doc2vec.modelが必要
+#features/en_to_ja.txtが必要
 base_dir="./"
 python="./venv/bin/python"
 today=$(date +%m%d)

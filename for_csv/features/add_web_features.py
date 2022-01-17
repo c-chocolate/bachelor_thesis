@@ -219,7 +219,7 @@ def get_js_comparison(domain):
                 decodejs = js.decode('utf-8')
                 jssplit = decodejs.split(' ')
 
-                model = Doc2Vec.load('doc2vec_model/test.model')
+                model = Doc2Vec.load('doc2vec.model')
                 similar = model.infer_vector(jssplit)
                 #print(similar)
                 similar_list.append(similar[0])
@@ -232,7 +232,7 @@ def get_js_comparison(domain):
                 decodejs = js.decode('utf-8')
                 jssplit = decodejs.split(' ')
                 
-                model = Doc2Vec.load('doc2vec_model/test.model')
+                model = Doc2Vec.load('doc2vec.model')
                 similar = model.infer_vector(jssplit)
                 #print(similar)
                 similar_list.append(similar[0])
