@@ -24,7 +24,7 @@ def get_html(url):
         resp = urllib.request.urlopen(request, timeout=5)
         return resp.read()
     except (socket.timeout, urllib.error.HTTPError, urllib.error.URLError, http.client.BadStatusLine, http.client.IncompleteRead, http.client.HTTPException,
-        UnicodeError, UnicodeEncodeError) as e: # possibly plaintext or HTTP/1.0
+        UnicodeError, UnicodeEncodeError,ConnectionResetError) as e: # possibly plaintext or HTTP/1.0
         print("ERROR:",e,url)
         return None
     except:
@@ -72,7 +72,7 @@ def link_to_code(url, link):
             contents = urllib.request.urlopen("http://"+url+"/"+ link,timeout=5)
             return contents.read()
         except (socket.timeout, urllib.error.HTTPError, urllib.error.URLError, http.client.BadStatusLine, http.client.IncompleteRead, http.client.HTTPException,
-        UnicodeError, UnicodeEncodeError): # possibly plaintext or HTTP/1.0
+        UnicodeError, UnicodeEncodeError,ConnectionResetError): # possibly plaintext or HTTP/1.0
             print("ERROR:",link)
             return None
         except:
@@ -87,7 +87,7 @@ def url_to_code(url):
         js = contents.read()
         return js
     except (socket.timeout, urllib.error.HTTPError, urllib.error.URLError, http.client.BadStatusLine, http.client.IncompleteRead, http.client.HTTPException,
-        UnicodeError, UnicodeEncodeError): # possibly plaintext or HTTP/1.0
+        UnicodeError, UnicodeEncodeError,ConnectionResetError): # possibly plaintext or HTTP/1.0
         print("ERROR:",url)
         return None
     except:
@@ -134,9 +134,9 @@ elif mode ==2:
 #    f.write(str(x) + "\n")
 #f.close()
 
-jsdata=[]
+#jsdata=[]
 datanum=0
-modetwo_datanum=-1
+
 """
 if mode==2:
     f5 = open("./testcsv.csv","r")
@@ -148,7 +148,7 @@ if mode==2:
         #list_row.append(x)
     #jsdata = pd.read_csv("jsdatalist.csv").values.tolist()
     f5.close()
-    modetwo_datanum=0       # !!jsdata_domainnum.txtの数-1入れる
+    modetwo_datanum=0       # jsdata_domainnum.txtの数-1入れる
 
     #print(jsdata[1][0])
  """   
@@ -156,9 +156,20 @@ if mode==2:
 
 index = 0
 
+readmode=1 #0:なし 1:途中読み込み !!
+
+if readmode==0:
+    jsdata=[]
+    modetwo_datanum=0
+elif readmode==1:
+    modetwo_datanum=1640     # !!
+    get_data=np.load('np_white_jsdata.npy', allow_pickle=True)  #!!
+    jsdata=get_data.tolist()
+    print("READ FINISH")
+
 if mode==0 or mode==1:
     for data in blacklist: 
-        if not data == '' and datanum>modetwo_datanum:
+        if not data == '' and datanum>=modetwo_datanum:
             data = data.rstrip('\n')
             domain = data.rstrip('\r')
             datanum+=1
@@ -190,8 +201,11 @@ if mode==0 or mode==1:
             f4 = open('jsdata_domainnum.txt', 'w')
             f4.write(str(datanum)+str(domain)+"\n")
             f4.close()
-        elif datanum<=modetwo_datanum:
+        elif datanum<modetwo_datanum:
             datanum+=1
+            data = data.rstrip('\n')
+            domain = data.rstrip('\r')
+            print("<<SKIP>>",datanum,domain)
 
 #print(jsdata[0][0])
 
@@ -210,7 +224,7 @@ if mode ==2 :
     for data in whitelist: 
         if index_white >= domainmax:
             break
-        if not data == '' and index_white>modetwo_datanum:
+        if not data == '' and index_white>=modetwo_datanum:
             index_white +=1
             data = data.rstrip('\n')
             domain = data.rstrip('\r')
@@ -241,8 +255,12 @@ if mode ==2 :
             f4 = open('jsdata_domainnum.txt', 'w')
             f4.write(str(index_white)+str(domain)+"\n")
             f4.close()
-        elif index_white<=modetwo_datanum:
+        elif index_white<modetwo_datanum:
             index_white+=1
+            data = data.rstrip('\n')
+            domain = data.rstrip('\r')
+            print("<<SKIP>>",index_white,domain)
+
 
 #f3.close()
 #f4.close()
@@ -255,6 +273,8 @@ if mode==3:
     jsdata=li_black_data+li_white_data
 #print(reredata[0][0])
 #print("QQQ",jsdata==reredata)
+#print(len(li_white_data))
+#print([len(v) for v in li_white_data])
 
 
 if mode==0 or mode==3:
