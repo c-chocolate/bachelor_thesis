@@ -54,7 +54,7 @@ def get_html(url):
     try:
         resp = urllib.request.urlopen(request, timeout=5)
         return resp.read()
-    except (urllib.error.HTTPError, urllib.error.URLError, http.client.BadStatusLine, http.client.IncompleteRead, http.client.HTTPException,
+    except (socket.timeout, urllib.error.HTTPError, urllib.error.URLError, http.client.BadStatusLine, http.client.IncompleteRead, http.client.HTTPException,
         UnicodeError, UnicodeEncodeError): # possibly plaintext or HTTP/1.0
         print("ERROR:", url)
         return None
@@ -65,16 +65,20 @@ def get_html(url):
 def get_css_link(url):
     html = get_html(url)
     if html:
-        decodehtml = html.decode('utf-8')
+        try:
+            decodehtml = html.decode('utf-8')
 
-        #href=で始まり.cssで終わる文字列検索
-        decodehtml = decodehtml.replace(' ','')
-        findcss = re.findall(r'href=.+\.css',decodehtml)     
-        for index, value in enumerate(findcss):
-            findcss[index] = value.replace('href="','')     
-        
+            #href=で始まり.cssで終わる文字列検索
+            decodehtml = decodehtml.replace(' ','')
+            findcss = re.findall(r'href=.+\.css',decodehtml)     
+            for index, value in enumerate(findcss):
+                findcss[index] = value.replace('href="','')     
+            
 
-        return findcss
+            return findcss
+        except (UnicodeDecodeError):
+            print("UnicodeDecodeError")
+            return None
     else:
         return None
 
@@ -84,21 +88,23 @@ def get_loop_css(url, csslink, index):
     css = link_to_code(url, csslink[index])     #開く
 
     if css:
-        decodecss = css.decode('utf-8')
-        decodecss = decodecss.replace(' ','')
+        try:
+            decodecss = css.decode('utf-8')
+            decodecss = decodecss.replace(' ','')
 
-        #見ているcssのリンクをとってくる
-        linkheader = re.search(r'.+\/',csslink[index]).group()
+            #見ているcssのリンクをとってくる
+            linkheader = re.search(r'.+\/',csslink[index]).group()
 
-        loopcss = re.findall(r'url\(.+\.css', decodecss)     
+            loopcss = re.findall(r'url\(.+\.css', decodecss)     
 
-        for index, value in enumerate(loopcss):     #いらないところを消す
-            loopcss[index] = value.replace('url("', linkheader) 
-        
-            if not loopcss[index] in csslink:     #配列csslinkのなにかと一致しなかったら
-                csslink.append(loopcss[index])
-                csslink = get_loop_css(url, csslink, len(csslink)-1)
-
+            for index, value in enumerate(loopcss):     #いらないところを消す
+                loopcss[index] = value.replace('url("', linkheader) 
+            
+                if not loopcss[index] in csslink:     #配列csslinkのなにかと一致しなかったら
+                    csslink.append(loopcss[index])
+                    csslink = get_loop_css(url, csslink, len(csslink)-1)
+        except (UnicodeDecodeError):
+            print("UnicodeDecodeError")
     return csslink
 
 
@@ -106,30 +112,34 @@ def get_loop_css(url, csslink, index):
 def get_js_link(url):
     html = get_html(url)
     if html:
-        decodehtml = html.decode('utf-8')
-        decodehtml = decodehtml.replace(' ','')     #空白を抜く
-        #src= or href=で始まり.jsで終わる文字列検索
-        findjssrc = re.findall(r'src=[\",\'][a-z,A-Z,0-9,\-,\_,\.,\!,\',\(,\),\~,\s,\/]+\.js[\",\']',decodehtml) 
-        findjshref = re.findall(r'href=[\",\'][a-z,A-Z,0-9,\-,\_,\.,\!,\',\(,\),\~,\s,\/]+\.js[\",\']',decodehtml) 
-        findjs = findjssrc + findjshref
-        #print(findjs)   
-        findjsurl = re.findall(r'https?://[a-z,A-Z,0-9,\-,\_,\.,\!,\',\(,\),\~,\s,\/]+\.js[\",\']',decodehtml)
-        #print(findjsurl) 
+        try:
+            decodehtml = html.decode('utf-8')
+            decodehtml = decodehtml.replace(' ','')     #空白を抜く
+            #src= or href=で始まり.jsで終わる文字列検索
+            findjssrc = re.findall(r'src=[\",\'][a-z,A-Z,0-9,\-,\_,\.,\!,\',\(,\),\~,\s,\/]+\.js[\",\']',decodehtml) 
+            findjshref = re.findall(r'href=[\",\'][a-z,A-Z,0-9,\-,\_,\.,\!,\',\(,\),\~,\s,\/]+\.js[\",\']',decodehtml) 
+            findjs = findjssrc + findjshref
+            #print(findjs)   
+            findjsurl = re.findall(r'https?://[a-z,A-Z,0-9,\-,\_,\.,\!,\',\(,\),\~,\s,\/]+\.js[\",\']',decodehtml)
+            #print(findjsurl) 
 
-        for index, value in enumerate(findjs):
-            findjs[index] = value.replace('src=','')
-            findjs[index] = findjs[index].replace('href=','')
-            findjs[index] = findjs[index].replace('\"','')
-            findjs[index] = findjs[index].replace("\'","")
-            
-            if findjs[index][:2]=='//':#頭が//だったらhttps:加えて、findjsurlに変更
-                findjsurl.append('https:' + findjs[index])
-                findjs[index] = ''
+            for index, value in enumerate(findjs):
+                findjs[index] = value.replace('src=','')
+                findjs[index] = findjs[index].replace('href=','')
+                findjs[index] = findjs[index].replace('\"','')
+                findjs[index] = findjs[index].replace("\'","")
+                
+                if findjs[index][:2]=='//':#頭が//だったらhttps:加えて、findjsurlに変更
+                    findjsurl.append('https:' + findjs[index])
+                    findjs[index] = ''
 
-        for index, value in enumerate(findjsurl):
-            findjsurl[index] = value.replace('\"','')
-            findjsurl[index] = findjsurl[index].replace("\'","")
-        return findjs, findjsurl
+            for index, value in enumerate(findjsurl):
+                findjsurl[index] = value.replace('\"','')
+                findjsurl[index] = findjsurl[index].replace("\'","")
+            return findjs, findjsurl
+        except (UnicodeDecodeError):
+            print("UnicodeDecodeError")
+            return None,None
     else:
         return None, None
 
@@ -140,7 +150,7 @@ def link_to_code(url, link):
         try:
             contents = urllib.request.urlopen("http://"+url+"/"+ link,timeout=5)
             return contents.read()
-        except (urllib.error.HTTPError, urllib.error.URLError, http.client.BadStatusLine, http.client.IncompleteRead, http.client.HTTPException,
+        except (socket.timeout, urllib.error.HTTPError, urllib.error.URLError, http.client.BadStatusLine, http.client.IncompleteRead, http.client.HTTPException,
         UnicodeError, UnicodeEncodeError): # possibly plaintext or HTTP/1.0
             print("ERROR:",link)
             return None
@@ -155,7 +165,7 @@ def url_to_code(url):
         contents = urllib.request.urlopen(url,timeout=5)
         js = contents.read()
         return js
-    except (urllib.error.HTTPError,http.client.BadStatusLine, http.client.IncompleteRead, http.client.HTTPException,
+    except (socket.timeout, urllib.error.HTTPError,http.client.BadStatusLine, http.client.IncompleteRead, http.client.HTTPException,
         UnicodeError, UnicodeEncodeError): # possibly plaintext or HTTP/1.0
         print("ERROR:",url)
         return None
@@ -210,32 +220,40 @@ def get_js_comparison(domain):
     jslink, jsurllink= get_js_link(domain)
     #print(jslink,jsurllink)
     similar_list = []
+    model = Doc2Vec.load('features/doc2vec.model')
 
     if jslink!=None:
         for index,value in enumerate(jslink):
             js = link_to_code(domain, value)
 
             if js:
-                decodejs = js.decode('utf-8')
-                jssplit = decodejs.split(' ')
+                try:
+                    decodejs = js.decode('utf-8')
+                    jssplit = decodejs.split(' ')
 
-                model = Doc2Vec.load('doc2vec.model')
-                similar = model.infer_vector(jssplit)
-                #print(similar)
-                similar_list.append(similar[0])
+                    #model = Doc2Vec.load('features/doc2vec.model')
+                    similar = model.infer_vector(jssplit)
+                    #print(similar)
+                    similar_list.append(similar[0])
+                except (UnicodeDecodeError):
+                    print("UnicodeDecodeError")
         
     if jsurllink!=None:
         for index,value in enumerate(jsurllink):
             js = url_to_code(value)
 
             if js:
-                decodejs = js.decode('utf-8')
-                jssplit = decodejs.split(' ')
-                
-                model = Doc2Vec.load('doc2vec.model')
-                similar = model.infer_vector(jssplit)
-                #print(similar)
-                similar_list.append(similar[0])
+                try:
+                    decodejs = js.decode('utf-8')
+                    jssplit = decodejs.split(' ')
+                    
+                    #model = Doc2Vec.load('features/doc2vec.model')
+                    similar = model.infer_vector(jssplit)
+                    #print(similar)
+                    similar_list.append(similar[0])
+                except (UnicodeDecodeError):
+                    print("UnicodeDecodeError")
+
     
     if similar_list:
         return similar_list
@@ -244,7 +262,7 @@ def get_js_comparison(domain):
 
 def get_dictionary():
 
-    dictionaryfile = open('en_to_ja.txt','r',encoding='UTF-8')
+    dictionaryfile = open('features/en_to_ja.txt','r',encoding='UTF-8')
     dictionaryword = []
     for data in dictionaryfile:
         newdata = re.sub(r"[^a-zA-Z0-9]","",data.split()[0])
@@ -262,28 +280,32 @@ def get_html_id_class(url):
 
     html = get_html(url)
     if html:
-        decodehtml = html.decode('utf-8')
+        try:
+            decodehtml = html.decode('utf-8')
 
-        #id名を探す
-        decodehtml = decodehtml.replace(' ','')     #空白を抜く
-        findidname = re.findall(r'id="[^"]+"', decodehtml)    
-        for index, value in enumerate(findidname):
-            findidname[index] = value.replace('id=','')
-            findidname[index] = findidname[index].replace('\"','')
-        findidname = list(set(findidname))        
+            #id名を探す
+            decodehtml = decodehtml.replace(' ','')     #空白を抜く
+            findidname = re.findall(r'id="[^"]+"', decodehtml)    
+            for index, value in enumerate(findidname):
+                findidname[index] = value.replace('id=','')
+                findidname[index] = findidname[index].replace('\"','')
+            findidname = list(set(findidname))        
 
-        #class名を探す
-        findclassname = re.findall(r'class="[^"]+"', decodehtml)    
-        for index, value in enumerate(findclassname):
-            findclassname[index] = value.replace('class=','')
-            findclassname[index] = findclassname[index].replace('\"','')
-        findclassname = list(set(findclassname))
+            #class名を探す
+            findclassname = re.findall(r'class="[^"]+"', decodehtml)    
+            for index, value in enumerate(findclassname):
+                findclassname[index] = value.replace('class=','')
+                findclassname[index] = findclassname[index].replace('\"','')
+            findclassname = list(set(findclassname))
 
-        #id名とclass名のリストを結合
-        findname = findidname + findclassname
-        findname.sort()
-        #findname.append('a-b-x_aw93az:sd.se9:')
-        #print(findname)     #idとclass名のリスト
+            #id名とclass名のリストを結合
+            findname = findidname + findclassname
+            findname.sort()
+            #findname.append('a-b-x_aw93az:sd.se9:')
+            #print(findname)     #idとclass名のリスト
+        except (UnicodeDecodeError):
+            print("UnicodeDecodeError")
+            findname=[]
     else:
         findname=[]
 
@@ -352,10 +374,13 @@ def add_web_features(url):
             css = link_to_code(domain, csslink[index])
 
             if css:
-                decodecss = css.decode('utf-8')
-                
-                cssresult = decodecss.count('{')
-                n_css_selectors += cssresult
+                try:
+                    decodecss = css.decode('utf-8')
+                    
+                    cssresult = decodecss.count('{')
+                    n_css_selectors += cssresult
+                except (UnicodeDecodeError):
+                    print("UnicodeDecodeError")
 
     #return n_css_selectors
 
@@ -412,19 +437,25 @@ def add_web_features(url):
             #print(js)
 
             if js:
-                decodejs = js.decode('utf-8')
-                jsresult = decodejs.count('function')
-                n_js_function += jsresult
+                try:
+                    decodejs = js.decode('utf-8')
+                    jsresult = decodejs.count('function')
+                    n_js_function += jsresult
+                except (UnicodeDecodeError):
+                    print("UnicodeDecodeError")
 
         for index, value in enumerate(jsurllink):   #URLのjsのとき
             jsresult = 0
             js = url_to_code(value)
 
             if js:
-                decodejs = js.decode('utf-8')
-                jsresult = decodejs.count('function')
-                #print(value,jsresult)
-                n_js_function += jsresult
+                try:
+                    decodejs = js.decode('utf-8')
+                    jsresult = decodejs.count('function')
+                    #print(value,jsresult)
+                    n_js_function += jsresult
+                except (UnicodeDecodeError):
+                    print("UnicodeDecodeError")
             
     #return resultsum
 
