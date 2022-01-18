@@ -5,6 +5,9 @@ from features import domain_name_features, dns_features, contextual_features
 from features import extra_features
 from joblib import Parallel, delayed
 
+from features import add_web_features   #追加
+
+output_num_print=0
 
 if len(sys.argv) < 2:
     print('Usage: {} DATE'.format(sys.argv[0]))
@@ -24,18 +27,23 @@ def generate(label, index, url):
     features.extend(dns_features(url))
     features.extend(contextual_features(url))
     features.extend(extra_features(url))
+    features.extend(add_web_features(url))      #追加
 
     print(','.join(format(i, 'g') for i in features), file=open(filename, 'w'))
+    output_num_print+=1     #追加
+    print("NOW",output_num_print)   #追加
     
 
 arg_list = []
 count = []
-with open('lists/{}/tranco_100k.txt'.format(date), 'r') as f:
+#with open('lists/{}/tranco_100k.txt'.format(date), 'r') as f:
+with open('tranco_100k.txt'.format(date), 'r') as f:   #追加
     lines = f.readlines()
     urls = list(map(lambda it: it.rstrip('\n'), lines))
     count.append(len(urls))
     arg_list.extend([(0, i, urls[i]) for i in range(len(urls))])
-with open('lists/{}/blacklist.txt'.format(date), 'r') as f:
+#with open('lists/{}/blacklist.txt'.format(date), 'r') as f:
+with open('blacklist.txt'.format(date), 'r') as f:      #追加
     lines = f.readlines()
     urls = list(map(lambda it: it.rstrip('\n'), lines))
     count.append(len(urls))
@@ -55,7 +63,9 @@ columns = [
     'n_ip', 'n_mx', 'n_ptr', 'n_ns', 'ns_similarity',
     'n_countries', 'mean_TTL', 'stdev_TTL',
     'n_labels', 'life_time', 'active_time',
-    'rv']
+    'rv',
+    'n_css_selectors', 'html_id_class_num', 'get_html_id_class_rate',       #追加
+    'n_js_function', 'js_comparison_average', 'js_comparison_max', 'js_comparison_min']     #追加
 
 for label in range(2):
     with open('{}_{}.csv'.format(label, date), 'w') as f:
