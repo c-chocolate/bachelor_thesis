@@ -1,6 +1,3 @@
 www-infosec.ist.osaka-u.ac.jp
 www.anarg.jp
 www-mura.ist.osaka-u.ac.jp
-www-higashi.ist.osaka-u.ac.jp
-www.ane.cmc.osaka-u.ac.jp
-www.osaka-u.ac.jp
