@@ -110,7 +110,7 @@ def decode_and_split(js):
 
     return jssplit_result
 
-mode = 2 #0:test 1:black 2:white 3:model       !!
+mode = 3 #0:test 1:black 2:white 3:model       !!
 
 if mode == 0 :
     f1 = open('test.txt','r',encoding='utf-8', errors="", newline="") 
@@ -156,7 +156,7 @@ if mode==2:
 
 index = 0
 
-readmode=1 #0:なし 1:途中読み込み !!
+readmode=0 #0:なし 1:途中読み込み !!
 
 if readmode==0:
     jsdata=[]
@@ -266,18 +266,26 @@ if mode ==2 :
 #f4.close()
 
 if mode==3:
+    print("LOADING")
     get_black_data=np.load('np_black_jsdata.npy', allow_pickle=True)
-    get_white_data=np.load('np_white_jsdata.npy', allow_pickle=True)
     li_black_data=get_black_data.tolist()
+    print("SIZE")
+    print(len(li_black_data))
+    get_white_data=np.load('np_white_jsdata.npy', allow_pickle=True)
     li_white_data=get_white_data.tolist()
-    jsdata=li_black_data+li_white_data
+    print(len(li_white_data))
+    resize_white=li_white_data[:11637]
+    jsdata=li_black_data+resize_white
 #print(reredata[0][0])
 #print("QQQ",jsdata==reredata)
-#print(len(li_white_data))
+#print("SIZE")
+#print(len(li_black_data))
+print(len(resize_white))
 #print([len(v) for v in li_white_data])
 
 
 if mode==0 or mode==3:
+    print("TRAINING")
     trainings = [TaggedDocument(data, [i]) for i,data in enumerate(jsdata)]
 
     # トレーニング
