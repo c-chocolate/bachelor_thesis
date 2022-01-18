@@ -27,3 +27,6 @@ def extra_features(domain):
                     rep += math.log2(ngram_table[gram] / i)
 
     return [rep]
+
+if __name__ == '__main__':
+    print(extra_features('www-infosec.ist.osaka-u.ac.jp'))

@@ -1,33 +1,3 @@
-"""
-import add_web_features_extractor
-
-
-def add_web_features(url):
-
-    n_css_selectors = get_n_css_selectors()
-    html_id_class_num = get_html_id_class_num()
-    html_id_class_rate = get_html_id_class_rate()
-    n_js_function = get_n_js_function()
-    js_comparison_average = get_js_comparison_average()
-    js_comparison_max = get_js_comparison_max()
-    js_comparison_min = get_js_comparison_min()
-
-#ZeroDivisionError
-
-
-    
-    return (n_css_selectors,
-        html_id_class_num,
-        html_id_class_rate,
-        n_js_function,
-        js_comparison_average,
-        js_comparison_max,
-        js_comparison_min)
-
-"""
-
-
-
 import http.client
 from io import BytesIO
 import os
@@ -93,7 +63,10 @@ def get_loop_css(url, csslink, index):
             decodecss = decodecss.replace(' ','')
 
             #見ているcssのリンクをとってくる
-            linkheader = re.search(r'.+\/',csslink[index]).group()
+            try:
+                linkheader = re.search(r'.+\/',csslink[index]).group()
+            except (AttributeError):
+                linkheader=""
 
             loopcss = re.findall(r'url\(.+\.css', decodecss)     
 
@@ -165,7 +138,7 @@ def url_to_code(url):
         contents = urllib.request.urlopen(url,timeout=5)
         js = contents.read()
         return js
-    except (socket.timeout, urllib.error.HTTPError,http.client.BadStatusLine, http.client.IncompleteRead, http.client.HTTPException,
+    except (socket.timeout, urllib.error.HTTPError, urllib.error.URLError, http.client.BadStatusLine, http.client.IncompleteRead, http.client.HTTPException,
         UnicodeError, UnicodeEncodeError): # possibly plaintext or HTTP/1.0
         print("ERROR:",url)
         return None
@@ -351,7 +324,13 @@ def add_web_features(url):
     self.update = None
     self.expire = None
     """
-
+    n_css_selectors=0
+    html_id_class_num=0
+    html_id_class_rate=0
+    n_js_function=0
+    js_comparison_average=0
+    js_comparison_max=0
+    js_comparison_min=0
 
 
 
@@ -362,8 +341,9 @@ def add_web_features(url):
     n_css_selectors=0
 
     if csslinkfromhtml:
+        #print(csslinkfromhtml)
         csslink=copy.copy(csslinkfromhtml)
-
+        #print(csslink)
         #cssからcssへのリンクを探す
         for index, value in enumerate(csslinkfromhtml):
             csslink = get_loop_css(domain, csslink, index)
@@ -382,59 +362,36 @@ def add_web_features(url):
                 except (UnicodeDecodeError):
                     print("UnicodeDecodeError")
 
-    #return n_css_selectors
-
-
-
-
 
     #def get_html_id_class_num(self):
    
     dictionaryword = get_dictionary()
-    findname = get_html_id_class(self.domain)
+    findname = get_html_id_class(domain)
 
     #アンダーバーとかハイフンの記号に対処 classは日本語？
 
     html_id_class_num = dictionary_check(dictionaryword, findname)
     
-    #return html_id_class_num
-
-
-
 
     #def get_html_id_class_rate(self):
 
-    #dictionaryword = get_dictionary()
-    #findname = get_html_id_class(self.domain)
-    #resultnum = dictionary_check(dictionaryword, findname)
-
-    #print('resultnum',resultnum)
-    #print('findname',len(findname))
     if len(findname)!=0:
         html_id_class_rate = 100*html_id_class_num / len(findname)
     else:
         html_id_class_rate = 0
-    #%でいい？
-
-    #return html_id_class_rate
-
-
+  
 
 
 
     #def get_n_js_function(self):
         
-    jslink, jsurllink = get_js_link(self.domain)   #jslink：配列でリンクが書かれている
-    #print(jslink)
-    #print(jsurllink)
+    jslink, jsurllink = get_js_link(domain)   #jslink：配列でリンクが書かれている
     n_js_function = 0
     
     if jslink!=None and jsurllink!=None:
-        #print(jslink,jsurllink)
         for index, value in enumerate(jslink):
             jsresult = 0
-            js = link_to_code(self.domain, value)
-            #print(js)
+            js = link_to_code(domain, value)
 
             if js:
                 try:
@@ -452,59 +409,34 @@ def add_web_features(url):
                 try:
                     decodejs = js.decode('utf-8')
                     jsresult = decodejs.count('function')
-                    #print(value,jsresult)
                     n_js_function += jsresult
                 except (UnicodeDecodeError):
                     print("UnicodeDecodeError")
             
-    #return resultsum
-
 
 
     #def get_js_comparison_average(self):    #ベクトルの平均
 
-    #similar_list=self.similar_list
+  
     if similar_list and len(similar_list)!=0:
         js_comparison_average = sum(similar_list) / len(similar_list)
         js_comparison_max = max(similar_list)
         js_comparison_min = min(similar_list)
-        #return js_comparison_average
-    
+        
     else:
-        #return 0
+       
         js_comparison_average = 0
         js_comparison_max = 0
         js_comparison_min = 0
 
+   
+
     return n_css_selectors, html_id_class_num, html_id_class_rate, n_js_function, js_comparison_average, js_comparison_max, js_comparison_min
    
 
-"""
-    #def get_js_comparison_max(self):    #ベクトルの最大
 
-        #similar_list=self.similar_list
-    if similar_list:
-        return max(similar_list)
-    
-    else:
-        return 0
-
-
-
-
-    #def get_js_comparison_min(self):    #ベクトルの最小
-
-        #similar_list=self.similar_list
-    if similar_list:
-        return min(similar_list)
-    
-    else:
-        return 0
-"""
-
-    #return n_css_selectors, html_id_class_num, html_id_class_rate, n_js_function, js_comparison_average, js_comparison_max, js_comparison_min
-   
 
 
 if __name__ == '__main__':
-    print(contextual_features('www-infosec.ist.osaka-u.ac.jp'))
+    domain='www-infosec.ist.osaka-u.ac.jp'
+    print(add_web_features(domain))

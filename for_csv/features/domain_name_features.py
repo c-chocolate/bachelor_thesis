@@ -126,3 +126,4 @@ if __name__ == '__main__':
     domain = 'zmfcgxwchmkfvqrwnnmgbvrsqjtcfwxr.soho.limo'
     #print(domain_name_features(domain))
     print(entropy('cg79wo20kl92doowfn01oqpo9mdieowv5tyj'))
+    print(domain_name_features('www-infosec.ist.osaka-u.ac.jp'))
