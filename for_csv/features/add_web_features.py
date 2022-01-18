@@ -476,7 +476,8 @@ def add_web_features(url):
         js_comparison_max = 0
         js_comparison_min = 0
 
-
+    return n_css_selectors, html_id_class_num, html_id_class_rate, n_js_function, js_comparison_average, js_comparison_max, js_comparison_min
+   
 
 """
     #def get_js_comparison_max(self):    #ベクトルの最大
@@ -501,13 +502,8 @@ def add_web_features(url):
         return 0
 """
 
-    return (n_css_selectors,
-        html_id_class_num,
-        html_id_class_rate,
-        n_js_function,
-        js_comparison_average,
-        js_comparison_max,
-        js_comparison_min)
+    #return n_css_selectors, html_id_class_num, html_id_class_rate, n_js_function, js_comparison_average, js_comparison_max, js_comparison_min
+   
 
 
 if __name__ == '__main__':
