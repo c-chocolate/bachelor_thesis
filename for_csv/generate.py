@@ -7,7 +7,7 @@ from joblib import Parallel, delayed
 
 from features import add_web_features   #追加
 
-output_num_print=0
+#output_num_print=0
 
 if len(sys.argv) < 2:
     print('Usage: {} DATE'.format(sys.argv[0]))
@@ -30,20 +30,20 @@ def generate(label, index, url):
     features.extend(add_web_features(url))      #追加
 
     print(','.join(format(i, 'g') for i in features), file=open(filename, 'w'))
-    output_num_print+=1     #追加
-    print("NOW",output_num_print)   #追加
+    #output_num_print+=1     #追加
+    #print("NOW",output_num_print)   #追加
     
 
 arg_list = []
 count = []
 #with open('lists/{}/tranco_100k.txt'.format(date), 'r') as f:
-with open('tranco_100k.txt'.format(date), 'r') as f:   #追加
+with open('test.txt'.format(date), 'r') as f:   #追加
     lines = f.readlines()
     urls = list(map(lambda it: it.rstrip('\n'), lines))
     count.append(len(urls))
     arg_list.extend([(0, i, urls[i]) for i in range(len(urls))])
 #with open('lists/{}/blacklist.txt'.format(date), 'r') as f:
-with open('blacklist.txt'.format(date), 'r') as f:      #追加
+with open('test2.txt'.format(date), 'r') as f:      #追加
     lines = f.readlines()
     urls = list(map(lambda it: it.rstrip('\n'), lines))
     count.append(len(urls))
@@ -52,7 +52,8 @@ with open('blacklist.txt'.format(date), 'r') as f:      #追加
 del lines
 del urls
 
-Parallel(n_jobs=96, verbose=3)([delayed(generate)(*arg) for arg in arg_list])
+#Parallel(n_jobs=96, verbose=3)([delayed(generate)(*arg) for arg in arg_list])
+Parallel(n_jobs=50, verbose=3)([delayed(generate)(*arg) for arg in arg_list])
 
 columns = [
     'label', 'length',
