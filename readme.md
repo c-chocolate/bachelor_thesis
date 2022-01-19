@@ -29,6 +29,6 @@ mode=3  悪性・良性のJSデータからdoc2vec.model作成
 server/get_features/doc2vec_model/np_black_jsdata.npy  
 server/get_features/doc2vec_model/np_white_jsdata.npy  
 
------その他-----
-traning_elm MADMAXより
-src Chengさんのデータ
+-----その他-----  
+traning_elm MADMAXより  
+src Chengさんのデータ  
