@@ -18,7 +18,7 @@ en_to_ja.txt    英和辞書
 --必要なファイル--  
 server/get_features/doc2vec_model/doc2vec.model  
 
------Doc2Vecのモデル作成-----
+-----Doc2Vecのモデル作成-----  
 python ex_doc2vec.py  
 --必要なファイル--  
 mode=1  悪性ドメインからJSデータをnpyに変換  
