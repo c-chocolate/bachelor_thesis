@@ -37,13 +37,13 @@ def generate(label, index, url):
 arg_list = []
 count = []
 #with open('lists/{}/tranco_100k.txt'.format(date), 'r') as f:
-with open('test.txt'.format(date), 'r') as f:   #追加
+with open('tranco_4000.txt'.format(date), 'r') as f:   #追加
     lines = f.readlines()
     urls = list(map(lambda it: it.rstrip('\n'), lines))
     count.append(len(urls))
     arg_list.extend([(0, i, urls[i]) for i in range(len(urls))])
 #with open('lists/{}/blacklist.txt'.format(date), 'r') as f:
-with open('test2.txt'.format(date), 'r') as f:      #追加
+with open('blacklist_4000.txt'.format(date), 'r') as f:      #追加
     lines = f.readlines()
     urls = list(map(lambda it: it.rstrip('\n'), lines))
     count.append(len(urls))
@@ -53,7 +53,7 @@ del lines
 del urls
 
 #Parallel(n_jobs=96, verbose=3)([delayed(generate)(*arg) for arg in arg_list])
-Parallel(n_jobs=50, verbose=3)([delayed(generate)(*arg) for arg in arg_list])
+Parallel(n_jobs=10, verbose=3)([delayed(generate)(*arg) for arg in arg_list])
 
 columns = [
     'label', 'length',
