@@ -11,6 +11,7 @@ for_csv/features/doc2vec.model
 条件とするドメイン数による  
 for_csv/blacklist_4000.txt  
 for_csv/tranco_4000.txt  
+0118は自分で取ったデータ　必要！！
 
 -----1ドメインの特徴量収集-----  
 python example.py  
