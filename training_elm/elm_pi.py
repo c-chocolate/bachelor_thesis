@@ -46,7 +46,7 @@ def shuffle_data(x_data, y_data):       #使ってない??
 
 def extract_data_balanced(df):      #l190
     benign = df["label"] == 0       # benign:良性  benign:boolean型  csvのlabel列が0だったらTrue
-    benign[24127:] = False      # 24127から最後まで　24127:収集したドメインの数
+    benign[4001:] = False      # 24127から最後まで　24127:収集したドメインの数     #変更
     df = pd.concat([df.loc[benign, :], df.loc[df["label"] == 1, :]], axis=0)        # concat:連結　axis=0:列に沿った処理　df.loc:配列から値取ってくるみたいな処理
     return df    #24127ずつ良性と悪性を取ってくる
 
@@ -101,7 +101,7 @@ def compute_permutaion_importance(perm_list, x_train_std, y_train, model, column
         scoring="accuracy",     #acuracy
         n_repeats=10,       #機能を順列化する回数。
         n_jobs=-1,      #並行して実行するジョブ数
-        random_state=71,        #各機能の順列を制御するための疑似乱数発生器
+        random_state=227,        #各機能の順列を制御するための疑似乱数発生器
     )
     print(result)
     perm_imp_df = pd.DataFrame(     #二次元の表形式データ
@@ -120,7 +120,7 @@ def feature_selection(file_name, threshold, columns):       #l211
         perm_imp_df = pd.read_csv(file_name, index_col=0)
         return list(perm_imp_df.index)[:threshold]
     else:
-        if threshold == 25:         #??threshold 引数
+        if threshold == 32:         #??threshold 引数   変更
             return columns          #??columns　引数
         else:
             raise ValueError("file not exists")
@@ -172,8 +172,8 @@ extraction_dataset_mode = (
     "normal"  # bengin than malicous("btm") or malicous than bengin ("mtb") or "normal"
 )
 shi_work = False
-save_mode = False
-pi_mode = True
+save_mode = True
+pi_mode = False
 
 ####################################
 
@@ -220,7 +220,7 @@ y_data = df["label"].values #labelだけ
 
 
 FOLD_NUM = 5        #KFoldの分割数
-fold_seed = 71      #乱数のシード指定
+fold_seed = 227      #乱数のシード指定
 folds = KFold(n_splits=FOLD_NUM, shuffle=True, random_state=fold_seed)      #Kfold:K-分割交差検証(データをn_split個に分け、n個を訓練用、k-n個をテスト用として使う)
 fold_iter = folds.split(x_data)     #x_dataを区切り文字で分割   5個に分割
 perm_list = []
@@ -263,7 +263,7 @@ for n_fold, (trn_idx, val_idx) in enumerate(fold_iter):     #enumerate:for文で
     recall_test_total.append(recall_score(y_test_true, y_test_pred))
     f1_test_total.append(f1_score(y_test_true, y_test_pred))
     # permutation importance
-    if threshold == 25 and pi_mode:
+    if threshold == 32 and pi_mode:     #変更
         perm_list = compute_permutaion_importance(      #l95の関数
             perm_list, x_train_std, y_train, model, columns_dic
         )
@@ -290,7 +290,7 @@ elif save_mode:
             threshold, n_unit
         )
     )
-if threshold == 25 and pi_mode:
+if threshold == 32 and pi_mode:     #変更
     output_perm_imp(perm_list, columns_dic, n_unit)     #l129の関数
 
-# Training(x_data, y_data, n_unit, threshold, save_mode=True, shi_work=shi_work)
+Training(x_data, y_data, n_unit, threshold, save_mode=True, shi_work=shi_work)
