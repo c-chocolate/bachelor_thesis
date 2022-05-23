@@ -15,7 +15,7 @@ for_csv/tranco_4000.txt
 
 -----1ドメインの特徴量収集-----  
 python example.py  
-en_to_ja.txt    英和辞書
+en_to_ja.txt    英和辞書   
 --必要なファイル--  
 server/get_features/doc2vec_model/doc2vec.model  
 
