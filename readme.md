@@ -1,3 +1,7 @@
+このリポジトリのコードは以下のリポジトリにあるコードをベースに利用しました。  
+https://github.com/kzk-IS/MADMAX
+
+
 -----特徴量のCSVファイル出力-----  
 python generate.py [ファイル名] 2>&1 > [ファイル]名.log  
 generate.sh Chengさんの実行コマンド  
